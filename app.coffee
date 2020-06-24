@@ -52,7 +52,7 @@ app.post '/', bodyParser.json(limit: payload_limit), ({body}, res) ->
              [content, output]]
     # combine arguments and call pdf compiler using shell
     # injection save function 'spawn' goo.gl/zspCaC
-    spawn 'wkhtmltopdf', (arg(body.options)
+    whp = spawn 'wkhtmltopdf', (arg(body.options)
     .concat(flow(remove(negate(last)), flatten)(files)))
     .then ->
       res.setHeader 'Content-type', 'application/pdf'
@@ -60,5 +60,6 @@ app.post '/', bodyParser.json(limit: payload_limit), ({body}, res) ->
     .catch -> res.status(BAD_REQUEST = 400).send 'invalid arguments'
     .then -> map fs.unlinkSync, compact([output, header, footer, content])
 
+    whp.childProcess.stderr.on 'data', (data) -> console.log data.toString().trim()
 app.listen process.env.PORT or 5555
 module.exports = app
